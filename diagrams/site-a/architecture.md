@@ -30,7 +30,7 @@ flowchart TB
 
     NSX --> MS["Network Microsegmentation"]
 
-## 2. AFTER — Modernized Infrastructure GCVE
+## 2. After - Modernized Infrastructure GCVE
 
     GCVE --> BK["Veeam Backup & Replication v12"]
 
