@@ -1,286 +1,258 @@
 # Enterprise Data Center Modernization & Private Cloud Migration
 
-### Infrastructure Architecture | VMware | Google Cloud VMware Engine | Cybersecurity | Business Continuity | IT Governance
+**Infrastructure Architecture | Data Center Modernization | Hybrid Cloud | Cybersecurity | Business Continuity**
 
-**Enterprise Infrastructure Transformation | Architecture & Technical Leadership**
-
-[English](README.md) | [Português](README.pt-BR.md)
+**English** | [Português](README.pt-BR.md)
 
 ---
 
-## Executive Summary
+## 1. Executive Summary
 
-This portfolio documents an enterprise infrastructure modernization and transformation initiative involving two critical data center environments.
+This project presents an enterprise infrastructure modernization initiative involving the transformation of two data center environments and the establishment of a new cloud infrastructure site, with a focus on technology evolution, security, operational resilience, business continuity, and IT governance.
 
-The program combined private cloud migration, on-premises infrastructure modernization, cybersecurity improvements, business continuity, infrastructure automation, and IT governance.
+The initiative involved three main components:
 
-The transformation addressed legacy infrastructure, virtualization modernization, hardware lifecycle, security vulnerabilities, operational standardization, and disaster recovery readiness.
+- **Site A — Network Infrastructure:** following the migration, the physical site remained operational exclusively to support network infrastructure and Layer 2 / Layer 3 connectivity services.
+- **GCVE — New Cloud Infrastructure Site:** the entire virtualized infrastructure previously hosted at Site A was migrated to Google Cloud VMware Engine (GCVE), establishing a new workload hosting environment.
+- **Site B — On-Premises Data Center:** remained operational on-premises and underwent modernization of its virtualization, compute, storage, and network infrastructure.
 
-The project adopted two complementary infrastructure strategies:
+The project also involved improvements to security, connectivity, backup, disaster recovery, automation, monitoring, and operational governance processes.
 
-| Environment | Transformation Strategy | Resulting Architecture |
-|---|---|---|
-| **Site A – Headquarters** | Data center migration | Google Cloud VMware Engine (GCVE) |
-| **Site B – Secondary Site** | On-premises infrastructure modernization | VMware vSphere 8 cluster |
+This repository documents the architecture, technical decisions, implementation strategies, operational procedures, and outcomes of the transformation.
 
-The resulting architecture combined cloud-based VMware infrastructure with a modernized on-premises environment, integrated through enterprise networking, data protection, and disaster recovery processes.
+## 2. Transformation Overview
 
-## Transformation Overview
+### 2.1 Site A — Transformation into a Network Infrastructure Site
 
-### Site A — Cloud Migration to GCVE
+Site A underwent a significant transformation. All virtualized infrastructure previously hosted at this location was migrated to Google Cloud VMware Engine (GCVE).
 
-Site A underwent a full migration of its virtualized infrastructure to Google Cloud VMware Engine.
+Following the migration, Site A ceased operating as a virtualized workload hosting environment and remained physically active exclusively to support network infrastructure and Layer 2 / Layer 3 connectivity services.
 
-The migration strategy included:
+Key characteristics:
 
-- VMware Export/Import.
-- RackWare migration tooling.
-- Lift-and-Shift migration approaches.
-- Operating system vulnerability remediation.
-- Application upgrades and modernization.
-- VMware NSX microsegmentation.
-- FortiGate security and connectivity integration.
+- Complete migration of virtualized infrastructure to GCVE.
+- Retention of physical network infrastructure.
+- Continuity of Layer 2 and Layer 3 connectivity services.
+- FortiGate for perimeter security and connectivity.
+- Connectivity to the GCVE environment.
+- Removal of local virtualized workload hosting responsibilities.
 
-After migration, only the Layer 2 and Layer 3 network infrastructure remained at the physical site.
+The migration strategy included VMware Export/Import, RackWare, and Lift and Shift approaches, according to workload characteristics and requirements.
 
-### Site B — On-Premises Infrastructure Modernization
+The transformation also included operating system vulnerability remediation and application upgrades to newer versions.
 
-Site B retained its on-premises infrastructure and received a modernization of its compute, storage, virtualization, and network layers.
+### 2.2 GCVE — New Cloud Infrastructure Site
 
-Key components included:
+Google Cloud VMware Engine became the new hosting environment for the virtualized infrastructure migrated from Site A.
 
-- VMware vSphere 8 and vCenter.
-- Four-node VMware compute cluster.
+The new environment was established to host enterprise workloads while maintaining VMware-based virtualization technologies within Google Cloud Platform.
+
+Key components:
+
+- Google Cloud VMware Engine (GCVE).
+- VMware NSX for network microsegmentation.
 - VMware HA and DRS.
+- FortiGate within the perimeter security and cloud connectivity architecture.
+- Workloads migrated from Site A.
+- Integration with the Site B Disaster Recovery strategy.
+
+### 2.3 Site B — On-Premises Infrastructure Modernization
+
+Site B remained on-premises and underwent modernization of its virtualization, compute, storage, and network infrastructure.
+
+Key components:
+
+- VMware vSphere 8 cluster with four compute nodes.
 - Dell PowerEdge R760 servers.
-- Dell PowerVault ME5224 block storage.
-- iSCSI connectivity over DAC cabling.
-- Dell PowerSwitch S5224F-ON.
-- FortiGate network segmentation and Layer 3 routing.
+- VMware vCenter, HA, and DRS.
+- Dell PowerVault ME5224 block storage using iSCSI connectivity.
+- Direct Attached Copper (DAC) interconnections.
+- Dell PowerSwitch S5224F-ON switches.
+- FortiGate for VLAN-based segmentation and Layer 3 routing.
+- Illumio/Guardicore solutions within the security and segmentation architecture.
+- Integration with the Veeam-based Disaster Recovery strategy targeting GCVE.
 
-Site B was integrated with the disaster recovery strategy through Veeam virtual machine replication to GCVE.
+## 3. High-Level Architecture
 
-## High-Level Architecture
+The following diagram conceptually represents the resulting architecture, highlighting the separation between the remaining network infrastructure at Site A, the new cloud hosting environment at GCVE, and the modernized on-premises data center at Site B.
 
-The following diagram illustrates the logical relationship between the two sites, their infrastructure models, and the disaster recovery architecture.
-
-```mermaid
+```mermaid id="eng3site"
 flowchart TB
-    subgraph SA["SITE A - HEADQUARTERS"]
-        GCA["Google Cloud VMware Engine"]
-        NSA["VMware NSX<br/>Microsegmentation"]
-        FWA["FortiGate"]
-        GCA --- NSA
-        NSA --- FWA
+
+    subgraph SITEA["SITE A — NETWORK INFRASTRUCTURE"]
+        A_NET["Physical Network Infrastructure"]
+        A_L2L3["Layer 2 / Layer 3 Connectivity"]
+        A_FW["FortiGate"]
+
+        A_NET --> A_L2L3
+        A_L2L3 --> A_FW
     end
 
-    subgraph SB["SITE B - ON-PREMISES"]
-        VC["VMware vCenter"]
-        CL["Four-Node VMware Cluster<br/>vSphere 8 / HA / DRS"]
-        PE["Dell PowerEdge R760"]
-        ME["Dell PowerVault ME5224"]
-        SW["Dell PowerSwitch S5224F-ON"]
-        FWB["FortiGate<br/>VLAN Segmentation / L3 Routing"]
+    subgraph GCVE["GCVE — NEW CLOUD INFRASTRUCTURE SITE"]
+        G_VMWARE["Google Cloud VMware Engine"]
+        G_NSX["VMware NSX"]
+        G_VMS["Migrated Virtual Workloads"]
 
-        VC --> CL
-        CL --> PE
-        CL --> ME
-        ME <-->|"iSCSI / DAC"| SW
-        CL --> SW
-        SW --> FWB
+        G_VMWARE --> G_NSX
+        G_NSX --> G_VMS
     end
 
-    VEEAM["Veeam Backup & Replication v12"]
-    SOBR["SOBR / Capacity Tier"]
-    GCS["Google Cloud Storage Coldline"]
+    subgraph SITEB["SITE B — ON-PREMISES DATA CENTER"]
+        B_FW["FortiGate"]
+        B_SW["Dell PowerSwitch S5224F-ON"]
+        B_VC["VMware vCenter / vSphere 8"]
+        B_ESX["4 x Dell PowerEdge R760"]
+        B_ST["Dell PowerVault ME5224"]
+        B_SEG["Network Segmentation"]
 
-    SB --> VEEAM
-    VEEAM -->|"VM Replication"| GCA
+        B_FW --> B_SW
+        B_SW --> B_VC
+        B_VC --> B_ESX
+        B_ESX <-->|iSCSI / DAC| B_ST
+        B_FW --> B_SEG
+    end
+
+    subgraph BACKUP["BACKUP AND DISASTER RECOVERY"]
+        VEEAM["Veeam Backup & Replication v12"]
+        SOBR["Scale-Out Backup Repository"]
+        GCS["Google Cloud Storage Coldline"]
+    end
+
+    A_FW <-->|Connectivity| G_VMWARE
+    B_VC --> VEEAM
     VEEAM --> SOBR
     SOBR --> GCS
+    VEEAM -->|"VM Replication"| G_VMWARE
 ```
 
-*Conceptual architecture diagram. It represents the documented logical architecture and does not specify physical connectivity, IP addressing, VLAN IDs, or undocumented implementation details.*
+*Conceptual architecture representation. It does not depict every physical component, network path, connectivity configuration, or implementation detail.*
 
-## Key Technologies
+## 4. Key Technologies
 
-| Domain | Technologies |
+| Category | Technologies |
 |---|---|
 | Virtualization | VMware vSphere 8, vCenter, HA, DRS |
-| Cloud Infrastructure | Google Cloud VMware Engine, Google Cloud Platform |
+| Cloud | Google Cloud Platform, GCVE |
+| Migration | RackWare, VMware Export/Import |
+| Security | FortiGate, VMware NSX, Illumio/Guardicore |
 | Compute | Dell PowerEdge R760 |
-| Storage | Dell PowerVault ME5224 |
-| Network | Dell PowerSwitch S5224F-ON, iSCSI, DAC, SD-WAN |
-| Network Security | FortiGate, VMware NSX |
-| Workload Security | Illumio / Guardicore |
-| Migration | RackWare, VMware Export/Import, Lift and Shift |
-| Backup & Recovery | Veeam Backup & Replication v12, SOBR, Capacity Tier |
+| Storage | Dell PowerVault ME5224, iSCSI |
+| Networking | Dell PowerSwitch S5224F-ON, DAC, SD-WAN, BGP |
+| Cloud Connectivity | Equinix Enterprise Connectivity, Google Cloud Partner Interconnect |
+| Backup and DR | Veeam Backup & Replication v12 |
 | Cloud Storage | Google Cloud Storage Coldline |
-| Vulnerability Management | Tenable, ManageEngine |
-| Privileged Access Management | BeyondTrust |
+| Automation | Terraform, Ansible, Packer |
 | Monitoring | Zabbix, Grafana |
-| Automation & IaC | Terraform, Ansible, Packer |
-| Scripting | PowerShell, Bash |
-| CI/CD | Azure DevOps |
+| Security and Vulnerability Management | Tenable, ManageEngine, BeyondTrust |
+| Governance | ITSM, Change Management, Azure DevOps |
 
-## Transformation Workstreams
+## 5. Transformation Workstreams
 
-### 1. Infrastructure Assessment & Architecture
+The initiative was organized into multiple technical and operational workstreams.
 
-- Infrastructure inventory and technical assessment.
-- Identification of hardware lifecycle risks and security vulnerabilities.
-- Virtualization environment assessment.
-- Architecture design and technology evaluation.
-- Infrastructure dependency mapping.
-- Technical documentation and modernization planning.
+### 5.1 Data Center and Cloud Modernization
 
-### 2. Cloud Migration & Private Cloud
+Migration of workloads to GCVE, transformation of Site A into a network infrastructure site, and modernization of the on-premises environment at Site B.
 
-- Migration of Site A's virtualized infrastructure to GCVE.
-- VMware Export/Import and RackWare migration approaches.
-- Lift-and-Shift migration strategy.
-- Operating system remediation and modernization.
-- Application upgrades and compatibility considerations.
-- Network and security integration.
+### 5.2 Network Architecture and Connectivity
 
-### 3. On-Premises Infrastructure Modernization
+Implementation of redundant connectivity, SD-WAN, BGP, Equinix Enterprise Connectivity, and Google Cloud Partner Interconnect.
 
-- Deployment of a four-node VMware vSphere 8 cluster.
-- Dell PowerEdge R760 compute infrastructure.
-- Dell PowerVault ME5224 block storage.
-- iSCSI storage connectivity using DAC cabling.
-- Dell PowerSwitch S5224F-ON switching infrastructure.
-- FortiGate network segmentation and Layer 3 routing.
-- VMware HA and DRS configuration.
+The architecture incorporated independent circuits, physically diverse paths, and redundant network equipment and connectivity.
 
-### 4. Cybersecurity & Vulnerability Remediation
+### 5.3 Security and Vulnerability Management
 
-- VMware NSX microsegmentation at Site A.
-- FortiGate VLAN segmentation at Site B.
-- Illumio / Guardicore workload segmentation.
-- Active Directory and role-based access controls.
-- BeyondTrust Privileged Access Management.
-- Multi-factor authentication and privileged account separation.
-- CIS-based hardening and vendor security recommendations.
-- Vulnerability assessment and remediation workflows.
-- Tenable validation scans.
+Strengthening security controls through hardening, vulnerability management, privileged access management, microsegmentation, and change governance.
 
-### 5. Backup, Recovery & Business Continuity
+Technologies and controls included identity management, BeyondTrust, Tenable, ManageEngine, VMware NSX, and FortiGate, alongside Illumio/Guardicore solutions.
 
-- Veeam Backup & Replication v12.
-- Centralized backup management.
-- SOBR with Capacity Tier.
-- Google Cloud Storage Coldline integration.
-- Site B virtual machine replication to GCVE.
-- Application-based RPO and RTO objectives.
-- Semiannual restore testing.
-- Annual full Site B unavailability simulation.
-- Technical validation and business acceptance.
+### 5.4 Backup and Disaster Recovery
 
-### 6. Network & Connectivity
+Veeam architecture incorporating SOBR, Capacity Tier, Google Cloud Storage Coldline, and virtual machine replication from Site B to GCVE.
 
-- Enterprise SD-WAN architecture.
-- Equinix Enterprise Connectivity.
-- Google Cloud Partner Interconnect.
-- Redundant connectivity through independent circuits and physically distinct locations.
-- BGP routing.
-- FortiGate security and traffic control.
-- Site-specific network segmentation architecture.
+The strategy also included periodic restore tests, functional validation, and disaster recovery exercises.
 
-### 7. Infrastructure Automation & Infrastructure as Code
+### 5.5 Automation and Infrastructure as Code
 
-- Terraform for infrastructure provisioning across GCP, VMware, and on-premises environments.
-- Ansible for server configuration and software installation.
-- Packer for server image generation.
-- Azure DevOps pipelines for infrastructure automation.
-- PowerShell and Bash operational automation.
+Use of Terraform, Ansible, and Packer for infrastructure provisioning, configuration management, and standardization.
 
-### 8. IT Governance, Monitoring & Operations
+These tools were integrated into corporate Azure DevOps pipelines to automate infrastructure activities.
 
-- Infrastructure monitoring with Zabbix and Grafana.
-- Native vendor monitoring integrations.
-- ITSM incident management integration with Microsoft Teams.
-- Incident severity and priority classification.
-- SLA management and incident escalation.
-- Change Management and approval workflows.
-- Annual infrastructure capacity planning.
-- Technical documentation and operational runbooks.
+### 5.6 Operational Governance
 
----
+Establishment and improvement of monitoring, incident management, change management, technical documentation, and capacity planning processes.
 
-## Project Documentation
+### 5.7 Business Continuity
 
-The repository is organized by technical domain. Each documentation area is intended to provide architecture context, technical decisions, implementation practices, and operational considerations.
+Definition of recovery strategies, workload criticality classification, RPO and RTO requirements, and periodic backup restoration and disaster recovery tests.
 
-| Documentation Area | Scope |
+### 5.8 Monitoring and IT Service Management
+
+Integration of monitoring alerts with ITSM and Microsoft Teams, automatic incident creation, severity classification, and escalation according to business impact.
+
+## 6. Project Documentation
+
+The documentation is organized by technical domain to provide structured navigation and demonstrate the architectural decisions and operational practices used throughout the transformation.
+
+| Area | Documentation |
 |---|---|
-| [Architecture Overview](architecture-overview/) | Executive architecture and transformation overview |
-| [Architecture Decisions](architecture-decisions/) | Technical decisions, rationale, and outcomes |
-| [Architecture](architecture/) | Infrastructure architecture documentation |
-| [Network](network/) | Network connectivity and architecture |
-| [Backup](backup/) | Veeam backup and infrastructure topology |
-| [Security](security/) | Infrastructure security and hardening |
-| [Automation](automation/) | Infrastructure automation and IaC |
-| [Governance](governance/) | Operational governance and controls |
-| [Operational Runbooks](operational-runbooks/) | Technical procedures and operational runbooks |
-| [Troubleshooting](troubleshooting/) | Technical challenges, remediation, and case studies |
-| [Diagrams](diagrams/) | Architecture and infrastructure diagrams |
-| [Additional Documentation](docs/) | Supporting technical documentation |
+| Architecture | [Architecture](architecture/) |
+| Executive Overview | [Architecture Overview](architecture-overview/) |
+| Technical Decisions | [Architecture Decisions](architecture-decisions/) |
+| Governance | [Governance](governance/) |
+| Security | [Security](security/) |
+| Network and Connectivity | [Network](network/) |
+| Backup and Recovery | [Backup](backup/) |
+| Automation | [Automation](automation/) |
+| Operational Procedures | [Operational Runbooks](operational-runbooks/) |
+| Troubleshooting and Case Studies | [Troubleshooting](troubleshooting/) |
+| Diagrams | [Diagrams](diagrams/) |
+| Additional Documentation | [Docs](docs/) |
 
-### Featured Technical Documents
+## 7. Project Leadership and Responsibilities
 
-- [Executive Architecture Overview](architecture-overview/executive-architecture-overview.md)
-- [Veeam Backup Architecture](backup/veeam-backup-architecture.md)
-- [Veeam Infrastructure Topology](backup/veeam-infrastructure-topology.md)
-- [Network & Connectivity Architecture](network/network-connectivity-architecture.md)
-- [Infrastructure Automation & IaC](automation/infrastructure-automation-iac.md)
-- [Infrastructure Security & Hardening](security/infrastructure-security-hardening.md)
-- [Operational Governance](governance/operational-governance.md)
-- [Technical Procedures & Operational Runbooks](operational-runbooks/technical-procedures-runbooks.md)
+The initiative involved infrastructure architecture, planning, technical execution, and operational governance activities.
 
-## Project Leadership & Responsibilities
+Key responsibilities included:
 
-The transformation involved technical and architectural leadership across the infrastructure modernization lifecycle.
+- Infrastructure architecture planning and evolution.
+- Technical coordination of infrastructure modernization.
+- Cloud workload migration strategy.
+- Transformation of Site A into a network infrastructure site.
+- Establishment of GCVE as the new workload hosting environment.
+- Modernization of Site B's on-premises infrastructure.
+- Definition of security and connectivity standards.
+- Backup, disaster recovery, and business continuity planning.
+- Infrastructure automation and Infrastructure as Code initiatives.
+- Implementation of governance and change management controls.
+- Risk, vulnerability, and capacity management.
+- Alignment of technical solutions with business requirements.
 
-Key areas of responsibility included:
+## 8. Strategic Outcomes
 
-- Infrastructure assessment and risk identification.
-- Target architecture design and technology evaluation.
-- Technical benchmarking and solution selection.
-- Business case development and executive budget presentations.
-- Migration strategy and execution planning.
-- Infrastructure modernization and cloud integration.
-- Cybersecurity improvements and vulnerability remediation.
-- Backup, recovery, and business continuity strategy.
-- IT governance and operational process implementation.
-- Cross-functional coordination and transition to operations.
+The transformation established a hybrid infrastructure architecture combining a new cloud infrastructure site, a modernized on-premises data center, and the remaining physical network infrastructure at Site A.
 
-## Strategic Outcomes
+Key outcomes:
 
-The transformation established two complementary infrastructure platforms and strengthened the organization's infrastructure capabilities.
+- Complete migration of Site A's virtualized infrastructure to GCVE.
+- Transformation of Site A into a network infrastructure and connectivity site.
+- Establishment of GCVE as the new hosting site for migrated workloads.
+- Modernization of Site B's virtualization and compute platform.
+- Evolution of connectivity architecture across environments.
+- Strengthening of security and network segmentation controls.
+- Improvement of vulnerability management processes.
+- Establishment of a Veeam-based backup and recovery strategy.
+- Replication of Site B workloads to GCVE.
+- Adoption of cloud storage for the Capacity Tier.
+- Evolution of infrastructure automation practices.
+- Strengthening of operational governance and business continuity.
 
-Key outcomes included:
+## 9. About This Portfolio
 
-- Migration of Site A's virtualized infrastructure to GCVE.
-- Modernization of Site B's on-premises VMware infrastructure.
-- Standardized virtualization management and infrastructure operations.
-- Improved network segmentation and security controls.
-- Structured vulnerability remediation and hardening processes.
-- Integrated backup, cloud capacity tier, and disaster recovery capabilities.
-- Defined recovery priorities based on business criticality.
-- Recurring restore testing and disaster recovery validation.
-- Infrastructure automation and operational governance improvements.
+This repository presents technical and architectural documentation of a real-world enterprise infrastructure modernization initiative.
 
-## About This Portfolio
+The content demonstrates practical experience in infrastructure architecture, hybrid cloud, cybersecurity, virtualization, automation, business continuity, and IT governance.
 
-This repository is a technical portfolio documenting enterprise infrastructure architecture, modernization, cloud migration, cybersecurity, automation, and operational governance experience.
+Sensitive organizational information, including IP addresses, server names, credentials, internal identifiers, proprietary configurations, and confidential implementation details, has been intentionally omitted.
 
-The case study is based on professional project experience in an anonymized enterprise environment.
-
-Confidential organizational information, sensitive infrastructure details, credentials, IP addresses, and proprietary configurations have been intentionally excluded.
-
-The documentation focuses on architectural decisions, technology selection, implementation approaches, operational practices, and lessons learned.
-
----
-
-**Areas of Expertise:** Enterprise Infrastructure | Cloud Architecture | VMware | Google Cloud | Cybersecurity | Disaster Recovery | Infrastructure Automation | IT Governance
+The objective is to demonstrate technical approaches, architectural decisions, and the ability to lead technology transformation initiatives in complex enterprise environments.
