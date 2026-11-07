@@ -22,3 +22,21 @@ flowchart TB
     R --> R3["Hardware Failures"]
     R --> R4["Security Vulnerabilities"]
     R --> R5["No Standardized Governance"]
+
+flowchart TB
+    GCVE --> VS["VMware vSphere 8"]
+    VS --> HA["VMware HA"]
+    VS --> DRS["VMware DRS"]
+    VS --> NSX["VMware NSX"]
+
+    NSX --> MS["Network Microsegmentation"]
+
+    GCVE --> BK["Veeam Backup & Replication v12"]
+
+    BK --> REC["Recovery Management"]
+    REC --> RTO["RTO Definition and Validation"]
+    REC --> RPO["RPO Definition and Validation"]
+    REC --> TEST["Infrastructure and Application Restore Tests"]
+
+    TEST --> BIZ["Business Stakeholder Validation"]
+    BIZ --> EVID["Documented and Recorded Evidence"]
