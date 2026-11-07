@@ -2,8 +2,7 @@
 
 **Infrastructure Architecture | Data Center Modernization | Hybrid Cloud | Cybersecurity | Business Continuity**
 
-**English** | [Português](README.pt-BR.md)
-
+**English** | [Português](https://github.com/CarloshZeferino/datacenter-modernization-private-cloud-migration/blob/main/README.pt-BR.md)
 ---
 
 ## 1. Executive Summary
