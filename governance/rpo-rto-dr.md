@@ -79,10 +79,3 @@ Os processos de recuperação devem ser revisados periodicamente, considerando a
 
 Os resultados dos testes devem servir como base para identificar oportunidades de melhoria nos procedimentos de recuperação.
 
-## 8. Conclusion
-
-The implementation of recovery objectives, backup protection and restore testing established an operational foundation for infrastructure resilience and business continuity across both sites.
-
----
-
-**Note:** RPO and RTO targets must be documented using the actual business-approved values. Recovery test results must be distinguished from target objectives.
