@@ -27,10 +27,9 @@ flowchart TB
     VS --> HA["VMware HA"]
     VS --> DRS["VMware DRS"]
     VS --> NSX["VMware NSX"]
+    
     NSX --> MS["Network Microsegmentation"]
 
-```mermaid
-flowchart TB
     GCVE --> BK["Veeam Backup & Replication v12"]
 
     BK --> REC["Recovery Management"]
