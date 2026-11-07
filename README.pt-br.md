@@ -1,6 +1,6 @@
 # Modernização de Data Center Corporativo e Migração para Private Cloud
 
-**Arquitetura de Infraestrutura | Modernização de Data Center | Cloud | Segurança | Continuidade de Negócios**
+**Arquitetura de Infraestrutura | Modernização de Data Center | Cloud Híbrida | Segurança | Continuidade de Negócios**
 
 [English Version](README.md) | **Português**
 
@@ -8,9 +8,13 @@
 
 ## 1. Resumo Executivo
 
-Este projeto apresenta uma iniciativa de modernização de infraestrutura corporativa, envolvendo a transformação de dois ambientes de data center, com foco em evolução tecnológica, segurança, resiliência operacional, continuidade de negócios e governança de TI.
+Este projeto apresenta uma iniciativa de modernização de infraestrutura corporativa, envolvendo a transformação de dois ambientes de data center e a criação de um novo ambiente de hospedagem em cloud, com foco em evolução tecnológica, segurança, resiliência operacional, continuidade de negócios e governança de TI.
 
-A iniciativa contemplou a migração integral da infraestrutura virtualizada do **Site A para o Google Cloud VMware Engine (GCVE)** e a modernização do **Site B**, que permaneceu em ambiente on-premises, com uma nova arquitetura VMware baseada em hardware Dell.
+A iniciativa contemplou três componentes principais:
+
+- **Site A — Infraestrutura de Rede:** após a migração, permaneceu fisicamente ativo exclusivamente para suportar a infraestrutura de rede e os serviços de conectividade L2 e L3.
+- **GCVE — Novo Site de Infraestrutura em Cloud:** recebeu toda a infraestrutura virtualizada anteriormente hospedada no Site A, passando a atuar como novo ambiente de hospedagem.
+- **Site B — Data Center On-Premises:** permaneceu em operação local, passando por uma modernização de sua infraestrutura de virtualização, computação, armazenamento e rede.
 
 O projeto também envolveu a evolução dos processos de segurança, conectividade, backup, disaster recovery, automação, monitoramento e governança operacional.
 
@@ -18,23 +22,41 @@ A documentação apresenta decisões arquiteturais, tecnologias utilizadas, estr
 
 ## 2. Visão Geral da Transformação
 
-### Site A — Migração para Google Cloud VMware Engine
+### 2.1 Site A — Transformação para um Ambiente de Rede
 
-Toda a infraestrutura virtualizada do Site A foi migrada para o Google Cloud VMware Engine (GCVE).
+O Site A passou por uma transformação significativa. Toda a infraestrutura virtualizada anteriormente hospedada nesse ambiente foi migrada para o Google Cloud VMware Engine (GCVE).
+
+Após a migração, o Site A deixou de atuar como ambiente de hospedagem de workloads e permaneceu fisicamente ativo exclusivamente para manter a infraestrutura de rede e conectividade L2 e L3.
+
+Principais características:
+
+- Migração integral da infraestrutura virtualizada para GCVE.
+- Manutenção da infraestrutura física de rede.
+- Preservação dos serviços de conectividade L2 e L3.
+- FortiGate para segurança de perímetro e conectividade.
+- Conectividade com o ambiente GCVE.
+- Descontinuação da hospedagem local dos workloads virtualizados.
 
 A estratégia de migração envolveu abordagens de VMware Export/Import, RackWare e Lift and Shift, considerando as características e necessidades dos workloads.
 
+Durante a transformação também foram realizadas atividades de correção de vulnerabilidades dos sistemas operacionais e atualização de aplicações para versões mais recentes.
+
+### 2.2 GCVE — Novo Site de Infraestrutura em Cloud
+
+O Google Cloud VMware Engine passou a funcionar como o novo ambiente de hospedagem da infraestrutura virtualizada migrada do Site A.
+
+Esse novo ambiente foi estruturado para suportar os workloads corporativos, mantendo a utilização das tecnologias VMware em uma infraestrutura hospedada na Google Cloud Platform.
+
 Principais componentes:
 
-- Migração da infraestrutura virtualizada para GCVE.
-- VMware NSX para microsegmentação de rede.
-- FortiGate para segurança de perímetro e conectividade.
-- VMware HA e DRS para disponibilidade e balanceamento de recursos.
-- Correção de vulnerabilidades nos sistemas operacionais.
-- Atualização e migração de aplicações para versões mais recentes.
-- Manutenção dos componentes de conectividade L2 e L3 no site físico.
+- Google Cloud VMware Engine (GCVE).
+- VMware NSX para microsegmentação.
+- VMware HA e DRS.
+- FortiGate no contexto de segurança de perímetro e conectividade com o ambiente cloud.
+- Workloads migrados do Site A.
+- Integração com a estratégia de Disaster Recovery do Site B.
 
-### Site B — Modernização da Infraestrutura On-Premises
+### 2.3 Site B — Modernização da Infraestrutura On-Premises
 
 O Site B permaneceu em ambiente on-premises, passando por uma modernização de sua infraestrutura de virtualização, computação, armazenamento e rede.
 
@@ -52,49 +74,58 @@ Principais componentes:
 
 ## 3. Arquitetura de Alto Nível
 
-O diagrama abaixo representa conceitualmente a arquitetura resultante da transformação.
+O diagrama abaixo representa conceitualmente a arquitetura resultante da transformação, destacando a separação entre a infraestrutura de rede remanescente no Site A, o novo ambiente de hospedagem GCVE e o data center on-premises do Site B.
 
 ```mermaid
 flowchart TB
-    subgraph SITEA["SITE A — GOOGLE CLOUD VMWARE ENGINE"]
-        GCFW["FortiGate"]
-        GCVE["Google Cloud VMware Engine"]
-        NSX["VMware NSX"]
-        VMA["Workloads Migrados"]
 
-        GCFW --> GCVE
-        GCVE --> NSX
-        NSX --> VMA
+    subgraph SITEA["SITE A — INFRAESTRUTURA DE REDE"]
+        A_NET["Infraestrutura Física de Rede"]
+        A_L2L3["Conectividade L2 / L3"]
+        A_FW["FortiGate"]
+
+        A_NET --> A_L2L3
+        A_L2L3 --> A_FW
     end
 
-    subgraph SITEB["SITE B — ON-PREMISES"]
-        FW["FortiGate"]
-        SW["Dell PowerSwitch S5224F-ON"]
-        VC["VMware vCenter / vSphere 8"]
-        ESX["4 x Dell PowerEdge R760"]
-        ST["Dell PowerVault ME5224"]
-        SEG["Segmentação e Segurança"]
+    subgraph GCVE["GCVE — NOVO SITE DE INFRAESTRUTURA EM CLOUD"]
+        G_VMWARE["Google Cloud VMware Engine"]
+        G_NSX["VMware NSX"]
+        G_VMS["Workloads Virtuais Migrados"]
 
-        FW --> SW
-        SW --> VC
-        VC --> ESX
-        ESX <-->|iSCSI / DAC| ST
-        FW --> SEG
+        G_VMWARE --> G_NSX
+        G_NSX --> G_VMS
     end
 
-    subgraph BACKUP["BACKUP E CONTINUIDADE"]
+    subgraph SITEB["SITE B — DATA CENTER ON-PREMISES"]
+        B_FW["FortiGate"]
+        B_SW["Dell PowerSwitch S5224F-ON"]
+        B_VC["VMware vCenter / vSphere 8"]
+        B_ESX["4 x Dell PowerEdge R760"]
+        B_ST["Dell PowerVault ME5224"]
+        B_SEG["Segmentação de Rede"]
+
+        B_FW --> B_SW
+        B_SW --> B_VC
+        B_VC --> B_ESX
+        B_ESX <-->|iSCSI / DAC| B_ST
+        B_FW --> B_SEG
+    end
+
+    subgraph BACKUP["BACKUP E DISASTER RECOVERY"]
         VEEAM["Veeam Backup & Replication v12"]
         SOBR["Scale-Out Backup Repository"]
         GCS["Google Cloud Storage Coldline"]
     end
 
-    VC --> VEEAM
+    A_FW <-->|Conectividade| G_VMWARE
+    B_VC --> VEEAM
     VEEAM --> SOBR
     SOBR --> GCS
-    VEEAM -->|"Replicação de VMs"| GCVE
+    VEEAM -->|"Replicação de VMs"| G_VMWARE
 ```
 
-*Representação conceitual. Não representa todos os componentes físicos, caminhos de rede ou detalhes de conectividade.*
+*Representação conceitual da arquitetura. Não representa todos os componentes físicos, caminhos de rede, configurações de conectividade ou detalhes de implementação.*
 
 ## 4. Principais Tecnologias
 
@@ -107,6 +138,7 @@ flowchart TB
 | Computação | Dell PowerEdge R760 |
 | Armazenamento | Dell PowerVault ME5224, iSCSI |
 | Rede | Dell PowerSwitch S5224F-ON, DAC, SD-WAN, BGP |
+| Conectividade Cloud | Equinix Enterprise Connectivity, Google Cloud Partner Interconnect |
 | Backup e DR | Veeam Backup & Replication v12 |
 | Cloud Storage | Google Cloud Storage Coldline |
 | Automação | Terraform, Ansible, Packer |
@@ -116,31 +148,39 @@ flowchart TB
 
 ## 5. Frentes de Trabalho da Transformação
 
-A iniciativa foi organizada em diferentes frentes técnicas e operacionais:
+A iniciativa foi organizada em diferentes frentes técnicas e operacionais.
 
 ### 5.1 Modernização de Data Center e Cloud
 
-Migração de workloads para GCVE, modernização do ambiente on-premises e evolução da arquitetura de infraestrutura.
+Migração de workloads para GCVE, transformação do Site A em um ambiente dedicado à infraestrutura de rede e modernização do ambiente on-premises do Site B.
 
 ### 5.2 Arquitetura de Rede e Conectividade
 
 Implementação de conectividade redundante, SD-WAN, BGP, Equinix Enterprise Connectivity e Google Cloud Partner Interconnect.
 
+A arquitetura considerou circuitos independentes, caminhos físicos distintos e redundância de equipamentos e conectividade.
+
 ### 5.3 Segurança e Gestão de Vulnerabilidades
 
 Fortalecimento dos controles de segurança, hardening, gestão de vulnerabilidades, controle de acesso privilegiado, microsegmentação e governança de mudanças.
 
+Foram utilizados controles de identidade, BeyondTrust, Tenable, ManageEngine, VMware NSX e FortiGate, além das soluções Illumio/Guardicore.
+
 ### 5.4 Backup e Disaster Recovery
 
-Arquitetura Veeam com SOBR, Capacity Tier, Google Cloud Storage Coldline e replicação de máquinas virtuais do Site B para GCVE.
+Arquitetura Veeam com SOBR, Capacity Tier, Google Cloud Storage Coldline e replicação de máquinas virtuais do Site B para o GCVE.
+
+A estratégia também contemplou testes periódicos de restauração, validação funcional e exercícios de recuperação de desastres.
 
 ### 5.5 Automação e Infrastructure as Code
 
 Uso de Terraform, Ansible e Packer para provisionamento, configuração e padronização de infraestrutura.
 
+As ferramentas foram integradas a pipelines corporativos no Azure DevOps para execução automatizada de atividades de infraestrutura.
+
 ### 5.6 Governança Operacional
 
-Estruturação de processos de monitoramento, incidentes, mudanças, documentação técnica e planejamento de capacidade.
+Estruturação de processos de monitoramento, gestão de incidentes, mudanças, documentação técnica e planejamento de capacidade.
 
 ### 5.7 Continuidade de Negócios
 
@@ -178,7 +218,9 @@ Entre as principais responsabilidades estão:
 - Planejamento e evolução da arquitetura de infraestrutura.
 - Coordenação técnica da modernização dos ambientes.
 - Estratégia de migração de workloads para cloud.
-- Modernização da infraestrutura on-premises.
+- Transformação do Site A em ambiente de infraestrutura de rede.
+- Estruturação do GCVE como novo site de hospedagem.
+- Modernização da infraestrutura on-premises do Site B.
 - Definição de padrões de segurança e conectividade.
 - Planejamento de backup, disaster recovery e continuidade de negócios.
 - Evolução dos processos de automação e Infrastructure as Code.
@@ -188,13 +230,15 @@ Entre as principais responsabilidades estão:
 
 ## 8. Resultados Estratégicos
 
-A transformação estabeleceu uma arquitetura híbrida, combinando infraestrutura em cloud e ambiente on-premises modernizado.
+A transformação estabeleceu uma arquitetura híbrida, combinando um novo ambiente de infraestrutura em cloud com um data center on-premises modernizado e uma infraestrutura física de rede remanescente no Site A.
 
 Principais resultados:
 
 - Migração integral da infraestrutura virtualizada do Site A para GCVE.
+- Transformação do Site A em um ambiente dedicado à infraestrutura de rede e conectividade.
+- Estabelecimento do GCVE como novo site de hospedagem dos workloads migrados.
 - Modernização da plataforma de virtualização e computação do Site B.
-- Evolução da arquitetura de conectividade entre ambientes.
+- Evolução da arquitetura de conectividade entre os ambientes.
 - Fortalecimento dos controles de segurança e segmentação.
 - Aprimoramento dos processos de gestão de vulnerabilidades.
 - Estruturação de uma estratégia de backup e recuperação com Veeam.
