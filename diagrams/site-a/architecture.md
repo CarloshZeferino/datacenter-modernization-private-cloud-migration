@@ -1,6 +1,6 @@
 # Site A — Headquarters Architecture
 
-## 1. Before Migration — Legacy Data Center
+## 1. Before Migration — Legacy Data Center and After - Modernization GCVE
 
 ```mermaid
 flowchart TB
