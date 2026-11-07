@@ -23,7 +23,6 @@ flowchart TB
     R --> R4["Security Vulnerabilities"]
     R --> R5["No Standardized Governance"]
 
-flowchart TB
     GCVE --> VS["VMware vSphere 8"]
     VS --> HA["VMware HA"]
     VS --> DRS["VMware DRS"]
