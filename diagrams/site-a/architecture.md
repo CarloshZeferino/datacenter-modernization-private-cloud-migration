@@ -27,7 +27,6 @@ flowchart TB
     VS --> HA["VMware HA"]
     VS --> DRS["VMware DRS"]
     VS --> NSX["VMware NSX"]
-
     NSX --> MS["Network Microsegmentation"]
 
 ```mermaid
