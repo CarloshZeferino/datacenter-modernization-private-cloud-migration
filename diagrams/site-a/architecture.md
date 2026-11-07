@@ -32,6 +32,8 @@ flowchart TB
 
 ## 2. After - Modernized Infrastructure GCVE
 
+```mermaid
+flowchart TB
     GCVE --> BK["Veeam Backup & Replication v12"]
 
     BK --> REC["Recovery Management"]
